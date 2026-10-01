@@ -1,0 +1,74 @@
+[
+  {
+    "id": "fix-1790856629285-mr5in",
+    "timestamp": "2026-10-01T12:10:29.285Z",
+    "language": "Python",
+    "errorMessage": "IndexError: list index out of range",
+    "codeSnippet": "items = [1,2,3]\nprint(items[3])",
+    "beginnerMode": true,
+    "mentorMode": true,
+    "result": {
+      "error_name": "IndexError: list index out of range",
+      "category": "Runtime",
+      "severity": "Medium",
+      "confidence": 100,
+      "what_happened": "The program attempted to access an element at index 3 in a list that only contains 3 elements.",
+      "root_cause": "Python uses zero-based indexing, meaning a 3-element list has valid indices of 0, 1, and 2. Requesting index 3 exceeds the list boundary.",
+      "why_it_happened": "Lists in Python are zero-indexed sequences. The length of list `items` is 3 (`len(items) == 3`). In a sequence of length N, valid positive indices range from 0 to N - 1. When `items[3]` was evaluated, Python checked whether 3 < len(items), found it was false, and raised an `IndexError`.",
+      "recommended_solution": "Change the index to 2 to get the last item (`items[2]`), or use Python's negative indexing feature (`items[-1]`) to access the final element safely without calculating the length.",
+      "corrected_code": "items = [1, 2, 3]\n\n# Option 1: Use index 2 (since indices start at 0: 0, 1, 2)\nprint(items[2])\n\n# Option 2: Use negative indexing to get the last element\nprint(items[-1])",
+      "explanation": "Because counting starts at 0, `items[0]` is 1, `items[1]` is 2, and `items[2]` is 3. Accessing index 2 retrieves the number 3. Alternatively, Python supports negative indices, where `-1` represents the last item in any non-empty list.",
+      "prevention_tips": [
+        "Remember that the last valid positive index of any list `lst` is always `len(lst) - 1`.",
+        "Use `items[-1]` to read the final element instead of computing manual boundary offsets.",
+        "When iterating through items, iterate directly over values (`for item in items:`) or use `enumerate(items)` rather than manual indexing."
+      ],
+      "commands": [],
+      "beginner_explanation": "Imagine a 3-story building where the ground floor is labeled Floor 0, the next is Floor 1, and the top is Floor 2. If you enter the elevator and press button 3, the elevator cannot take you there because Floor 3 does not exist—the highest floor is 2. In Python, lists start counting from 0 just like this elevator.",
+      "mentor_guidance": {
+        "guiding_question": "If Python starts counting positions at 0 instead of 1, what are the label numbers for each of the three items?",
+        "hint_1": "Write down the list and write the numbers 0, 1, 2... underneath each item one by one.",
+        "hint_2": "Look at the third item, `3`. What number did you write directly beneath it?",
+        "hint_3": "The list has 3 items, so the positions are 0, 1, and 2. There is no position 3.",
+        "checkpoint_task": "Run `print(len(items))` in your terminal or REPL, and verify why any index equal to or greater than that length will fail."
+      }
+    }
+  },
+  {
+    "id": "demo-py-1",
+    "timestamp": "2026-10-01T10:09:56.343Z",
+    "language": "Python",
+    "errorMessage": "IndexError: list index out of range",
+    "codeSnippet": "items = [10, 20, 30]\nfor i in range(len(items) + 1):\n    print(items[i])",
+    "beginnerMode": true,
+    "mentorMode": false,
+    "result": {
+      "error_name": "IndexError: list index out of range",
+      "category": "Runtime",
+      "severity": "Medium",
+      "confidence": 98,
+      "what_happened": "The program tried to access an item at an index that does not exist in the list.",
+      "root_cause": "The loop condition `range(len(items) + 1)` iterates up to index 3, but the 3-element list only has indices 0, 1, and 2.",
+      "why_it_happened": "In Python, lists are 0-indexed. With 3 items, valid indices are 0, 1, and 2. Attempting to access index 3 causes Python to raise an IndexError.",
+      "recommended_solution": "Iterate directly over the elements using `for item in items:` or use `range(len(items))` without adding 1.",
+      "corrected_code": "items = [10, 20, 30]\n# Direct iteration (Pythonic)\nfor item in items:\n    print(item)\n\n# Or using standard index range:\n# for i in range(len(items)):\n#     print(items[i])",
+      "explanation": "Iterating directly over items avoids manual index calculation and prevents off-by-one errors completely.",
+      "prevention_tips": [
+        "Prefer direct iteration `for item in collection:` over index-based loops.",
+        "If you need indices, use Python built-in `enumerate(items)`.",
+        "Remember list indices stop at `len - 1` because indexing starts at 0."
+      ],
+      "commands": [
+        "python3 main.py"
+      ],
+      "beginner_explanation": "Imagine a shelf with 3 boxes labeled #0, #1, and #2. The program asked for box #3, which does not exist, so Python stopped and sounded an alarm.",
+      "mentor_guidance": {
+        "guiding_question": "How many items are in the list, and what are their index numbers starting from 0?",
+        "hint_1": "Check how many times your loop runs compared to the list length.",
+        "hint_2": "Notice `len(items)` is 3. What values does `range(len(items) + 1)` generate?",
+        "hint_3": "`range(4)` gives 0, 1, 2, 3. Index 3 is out of bounds.",
+        "checkpoint_task": "Try removing `+ 1` or changing the loop to `for item in items:` and re-run."
+      }
+    }
+  }
+]

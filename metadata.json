@@ -1,0 +1,8 @@
+{
+  "name": "CodeFix AI - AI Debugging Assistant",
+  "description": "A structured AI-powered debugging assistant for developers that analyzes error messages, diagnoses root causes, provides fixes, and offers beginner and mentor guidance.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

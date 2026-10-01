@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug History - CodeFix AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <span class="brand-icon">⚡</span>
+        <span class="brand-title">CodeFix<span class="brand-accent">AI</span></span>
+      </div>
+      <div class="nav-links">
+        <a href="{{ url_for('index') }}" class="nav-link">Debugger</a>
+        <a href="{{ url_for('history') }}" class="nav-link active">History</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <div class="history-top-bar">
+      <div>
+        <h1 class="page-title">Debug History & Archive</h1>
+        <p class="subtitle">All past analyzed errors stored persistently in SQLite database.</p>
+      </div>
+      <div class="history-controls">
+        <a href="{{ url_for('index') }}" class="primary-btn">+ New Debug</a>
+        {% if records and records|length > 0 %}
+        <form action="{{ url_for('clear_history') }}" method="POST" onsubmit="return confirm('Clear entire debug history?');" style="display:inline;">
+          <button type="submit" class="danger-btn">Clear All</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Live Filter Input -->
+    <div class="filter-bar">
+      <input type="text" id="historySearch" placeholder="Search by error name, language, or category..." onkeyup="filterHistoryTable()" class="search-input">
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-container">
+          {% for category, message in messages %}
+            <div class="flash-alert flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% if not records or records|length == 0 %}
+    <div class="empty-state-card">
+      <div class="empty-icon">📭</div>
+      <h3>No Debug Sessions Yet</h3>
+      <p>Analyze your first error to see it recorded here in SQLite.</p>
+      <a href="{{ url_for('index') }}" class="primary-btn" style="margin-top: 1rem; display:inline-block;">Start Debugging</a>
+    </div>
+    {% else %}
+    <div class="table-container">
+      <table class="history-table" id="historyTable">
+        <thead>
+          <tr>
+            <th>Date / Time</th>
+            <th>Language</th>
+            <th>Error Name / Type</th>
+            <th>Category</th>
+            <th>Severity</th>
+            <th>Confidence</th>
+            <th>Modes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rec in records %}
+          <tr class="history-row">
+            <td class="time-col">{{ rec.timestamp }}</td>
+            <td><span class="language-badge">{{ rec.language }}</span></td>
+            <td class="error-name-col">
+              <a href="{{ url_for('result', record_id=rec.id) }}" class="history-error-link">
+                {{ rec.error_name }}
+              </a>
+              <div class="history-summary-sub">{{ rec.what_happened[:80] }}{% if rec.what_happened|length > 80 %}...{% endif %}</div>
+            </td>
+            <td><span class="category-badge cat-{{ rec.category.lower() }}">{{ rec.category }}</span></td>
+            <td><span class="severity-badge sev-{{ rec.severity.lower() }}">{{ rec.severity }}</span></td>
+            <td><strong>{{ rec.confidence }}%</strong></td>
+            <td>
+              {% if rec.is_beginner_mode %}<span class="mode-tag" title="Beginner Mode">🌱</span>{% endif %}
+              {% if rec.is_mentor_mode %}<span class="mode-tag" title="Mentor Mode">🧙‍♂️</span>{% endif %}
+            </td>
+            <td class="actions-col">
+              <a href="{{ url_for('result', record_id=rec.id) }}" class="view-btn">View</a>
+              <form action="{{ url_for('delete_record', record_id=rec.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this record?');">
+                <button type="submit" class="trash-btn" title="Delete">🗑️</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </main>
+
+  <footer class="footer">
+    <p>Built for Hackathon 2026 • Powered by Google Gemini 3.8 Flash • Flask & SQLite</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

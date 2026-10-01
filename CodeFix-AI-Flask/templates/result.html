@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnosis: {{ record.error_name }} - CodeFix AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <span class="brand-icon">⚡</span>
+        <span class="brand-title">CodeFix<span class="brand-accent">AI</span></span>
+      </div>
+      <div class="nav-links">
+        <a href="{{ url_for('index') }}" class="nav-link">← New Debug Session</a>
+        <a href="{{ url_for('history') }}" class="nav-link">History</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <!-- Top Action Bar -->
+    <div class="result-top-bar">
+      <div class="result-header">
+        <span class="timestamp-tag">Analyzed: {{ record.timestamp }}</span>
+        <h1 class="result-title">{{ record.error_name }}</h1>
+      </div>
+      <div class="result-top-actions">
+        <a href="{{ url_for('index') }}" class="secondary-btn">Debug Another Error</a>
+      </div>
+    </div>
+
+    <!-- 1. ERROR FINGERPRINT CARD -->
+    <div class="card fingerprint-card">
+      <div class="card-header">
+        <span class="card-icon">🔎</span>
+        <h2>ERROR FINGERPRINT</h2>
+      </div>
+      <div class="fingerprint-grid">
+        <div class="fp-item">
+          <span class="fp-label">Language</span>
+          <span class="fp-val language-badge">{{ record.language }}</span>
+        </div>
+        <div class="fp-item">
+          <span class="fp-label">Category</span>
+          <span class="fp-val category-badge cat-{{ record.category.lower() }}">{{ record.category }}</span>
+        </div>
+        <div class="fp-item">
+          <span class="fp-label">Severity</span>
+          <span class="fp-val severity-badge sev-{{ record.severity.lower() }}">{{ record.severity }}</span>
+        </div>
+        <div class="fp-item">
+          <span class="fp-label">AI Confidence</span>
+          <span class="fp-val confidence-badge">{{ record.confidence }}%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. BEGINNER MODE (If enabled) -->
+    {% if record.is_beginner_mode and record.beginner_explanation %}
+    <div class="card beginner-card">
+      <div class="card-header">
+        <span class="card-icon">🌱</span>
+        <h2>Explain Like I'm a Beginner</h2>
+      </div>
+      <div class="card-body">
+        <p class="beginner-text">{{ record.beginner_explanation }}</p>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- 3. DEBUGGING MENTOR MODE (If enabled) -->
+    {% if record.is_mentor_mode and record.mentor_guidance %}
+    <div class="card mentor-card">
+      <div class="card-header">
+        <span class="card-icon">🧙‍♂️</span>
+        <h2>Debugging Mentor Walkthrough</h2>
+      </div>
+      <div class="card-body">
+        <p class="mentor-lead">Before jumping straight to the solution, let's think through how to track down this bug:</p>
+        
+        {% if record.mentor_guidance.guiding_question %}
+        <div class="mentor-step">
+          <strong class="mentor-step-title">🤔 Guiding Question:</strong>
+          <p>{{ record.mentor_guidance.guiding_question }}</p>
+        </div>
+        {% endif %}
+
+        <div class="hints-accordion">
+          {% if record.mentor_guidance.hint_1 %}
+          <details class="hint-details">
+            <summary>💡 Hint 1 (Gentle Clue)</summary>
+            <p>{{ record.mentor_guidance.hint_1 }}</p>
+          </details>
+          {% endif %}
+
+          {% if record.mentor_guidance.hint_2 %}
+          <details class="hint-details">
+            <summary>💡 Hint 2 (Deeper Clue)</summary>
+            <p>{{ record.mentor_guidance.hint_2 }}</p>
+          </details>
+          {% endif %}
+
+          {% if record.mentor_guidance.hint_3 %}
+          <details class="hint-details">
+            <summary>💡 Hint 3 (Direct Clue)</summary>
+            <p>{{ record.mentor_guidance.hint_3 }}</p>
+          </details>
+          {% endif %}
+        </div>
+
+        {% if record.mentor_guidance.checkpoint_task %}
+        <div class="checkpoint-box">
+          <strong>✅ Self-Check Task:</strong> {{ record.mentor_guidance.checkpoint_task }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- 4. ERROR DETECTED & ORIGINAL INPUT -->
+    <div class="card error-detected-card">
+      <div class="card-header">
+        <span class="card-icon">🔴</span>
+        <h2>Error Detected</h2>
+      </div>
+      <div class="card-body">
+        <p class="summary-paragraph"><strong>What happened:</strong> {{ record.what_happened }}</p>
+        <div class="code-box-wrapper">
+          <div class="code-box-header">
+            <span>Raw Error Message</span>
+            <button class="copy-btn" onclick="copyToClipboard('origErrorMsg')">Copy</button>
+          </div>
+          <pre><code id="origErrorMsg">{{ record.error_message }}</code></pre>
+        </div>
+
+        {% if record.code_snippet %}
+        <div class="code-box-wrapper" style="margin-top: 1rem;">
+          <div class="code-box-header">
+            <span>Original Code Snippet</span>
+            <button class="copy-btn" onclick="copyToClipboard('origCodeSnippet')">Copy</button>
+          </div>
+          <pre><code id="origCodeSnippet">{{ record.code_snippet }}</code></pre>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- 5. ROOT CAUSE -->
+    <div class="card root-cause-card">
+      <div class="card-header">
+        <span class="card-icon">🧠</span>
+        <h2>Root Cause & Mechanics</h2>
+      </div>
+      <div class="card-body">
+        <div class="cause-highlight">
+          <strong>Underlying Cause:</strong> {{ record.root_cause }}
+        </div>
+        <p class="why-paragraph"><strong>Why it happened:</strong> {{ record.why_it_happened }}</p>
+      </div>
+    </div>
+
+    <!-- 6. RECOMMENDED FIX -->
+    <div class="card fix-card">
+      <div class="card-header">
+        <div class="header-left">
+          <span class="card-icon">🛠️</span>
+          <h2>Recommended Fix</h2>
+        </div>
+        <button class="copy-btn" onclick="copyToClipboard('recommendedFixText')">Copy Solution</button>
+      </div>
+      <div class="card-body">
+        <div id="recommendedFixText" class="fix-text">{{ record.recommended_solution }}</div>
+
+        {% if record.commands and record.commands|length > 0 %}
+        <div class="commands-section">
+          <h4>Terminal / Command Line:</h4>
+          {% for cmd in record.commands %}
+          <div class="terminal-command-bar">
+            <code>{{ cmd }}</code>
+            <button class="copy-small-btn" onclick="copyText('{{ cmd }}')">Copy</button>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- 7. CORRECTED CODE -->
+    {% if record.corrected_code %}
+    <div class="card code-card">
+      <div class="card-header">
+        <div class="header-left">
+          <span class="card-icon">💻</span>
+          <h2>Corrected Code</h2>
+        </div>
+        <button class="copy-btn" onclick="copyToClipboard('correctedCodeBlock')">Copy Code</button>
+      </div>
+      <div class="card-body">
+        <div class="code-box-wrapper">
+          <pre><code id="correctedCodeBlock" class="code-font">{{ record.corrected_code }}</code></pre>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- 8. EXPLANATION -->
+    <div class="card explanation-card">
+      <div class="card-header">
+        <span class="card-icon">📖</span>
+        <h2>Explanation of the Fix</h2>
+      </div>
+      <div class="card-body">
+        <p>{{ record.explanation }}</p>
+      </div>
+    </div>
+
+    <!-- 9. PREVENTION TIPS -->
+    {% if record.prevention_tips and record.prevention_tips|length > 0 %}
+    <div class="card prevention-card">
+      <div class="card-header">
+        <span class="card-icon">🛡️</span>
+        <h2>Prevention & Best Practices</h2>
+      </div>
+      <div class="card-body">
+        <ul class="prevention-list">
+          {% for tip in record.prevention_tips %}
+          <li>{{ tip }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="bottom-actions">
+      <a href="{{ url_for('index') }}" class="primary-btn">Debug Another Error</a>
+      <a href="{{ url_for('history') }}" class="secondary-btn">View All History</a>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Built for Hackathon 2026 • Powered by Google Gemini 3.8 Flash • Flask & SQLite</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeFix AI - AI Debugging Assistant</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <span class="brand-icon">⚡</span>
+        <span class="brand-title">CodeFix<span class="brand-accent">AI</span></span>
+      </div>
+      <div class="nav-links">
+        <a href="{{ url_for('index') }}" class="nav-link active">Debugger</a>
+        <a href="{{ url_for('history') }}" class="nav-link">History</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <section class="hero-section">
+      <div class="hero-badge">AI-Powered Debugger for Developers</div>
+      <h1 class="hero-title">Debug Programming Errors In Seconds</h1>
+      <p class="hero-tagline">Paste your error stack trace and code. Get root cause diagnosis, corrected code, beginner analogies, and interactive mentor hints.</p>
+    </section>
+
+    <!-- Quick Demo Presets for Hackathon Judges -->
+    <div class="demo-presets-card">
+      <span class="preset-label">⚡ Hackathon Demo Presets:</span>
+      <button type="button" class="preset-btn" onclick="loadPreset('python')">Python IndexError</button>
+      <button type="button" class="preset-btn" onclick="loadPreset('javascript')">JS TypeError</button>
+      <button type="button" class="preset-btn" onclick="loadPreset('java')">Java NullPointer</button>
+      <button type="button" class="preset-btn" onclick="loadPreset('cpp')">C++ Segfault</button>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-container">
+          {% for category, message in messages %}
+            <div class="flash-alert flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('analyze') }}" method="POST" class="debugger-form" id="debugForm">
+      <div class="form-row language-row">
+        <label for="language" class="form-label">Programming Language <span class="required">*</span></label>
+        <select name="language" id="language" class="form-select" required>
+          {% for lang in languages %}
+            <option value="{{ lang }}" {% if selected_language == lang %}selected{% endif %}>{{ lang }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="label-with-hint">
+          <label for="error_message" class="form-label">Error Message / Stack Trace <span class="required">*</span></label>
+          <span class="hint-text">Paste the exact console or compiler error output</span>
+        </div>
+        <textarea name="error_message" id="error_message" class="form-textarea code-font" rows="5" placeholder="e.g. IndexError: list index out of range at line 4..." required>{{ error_message or '' }}</textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="label-with-hint">
+          <label for="code_snippet" class="form-label">Relevant Source Code <span class="optional">(Optional but recommended)</span></label>
+          <span class="hint-text">Paste the function or block where the error occurred</span>
+        </div>
+        <textarea name="code_snippet" id="code_snippet" class="form-textarea code-font" rows="8" placeholder="def process_items(data):&#10;    for i in range(len(data) + 1):&#10;        print(data[i])">{{ code_snippet or '' }}</textarea>
+      </div>
+
+      <!-- Mode Toggles -->
+      <div class="modes-grid">
+        <label class="toggle-card">
+          <input type="checkbox" name="beginner_mode" id="beginner_mode" {% if beginner_mode %}checked{% endif %}>
+          <div class="toggle-content">
+            <span class="toggle-title">🌱 Explain Like I'm a Beginner</span>
+            <span class="toggle-desc">Plain English analogies without dense jargon. Ideal for learners.</span>
+          </div>
+        </label>
+
+        <label class="toggle-card">
+          <input type="checkbox" name="mentor_mode" id="mentor_mode" {% if mentor_mode %}checked{% endif %}>
+          <div class="toggle-content">
+            <span class="toggle-title">🧙‍♂️ Debugging Mentor Mode</span>
+            <span class="toggle-desc">Socratic hints and guiding questions to learn how to debug.</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <span class="btn-text">Analyze & Fix Error 🚀</span>
+          <span class="spinner" id="btnSpinner" style="display: none;"></span>
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <footer class="footer">
+    <p>Built for Hackathon 2026 • Powered by Google Gemini 3.8 Flash • Flask & SQLite Architecture</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
